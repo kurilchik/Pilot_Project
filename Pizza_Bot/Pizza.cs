@@ -1,7 +1,5 @@
 ﻿using Pizza_Bot.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace Pizza_Bot
 {
@@ -13,5 +11,6 @@ namespace Pizza_Bot
         public int Id { get; set; }
         public string Title { get; set; }
         public string Body { get; set; }
+
     }
 }
