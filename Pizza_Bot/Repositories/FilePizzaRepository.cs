@@ -8,7 +8,7 @@ namespace Pizza_Bot.Repositories
 {
     class FilePizzaRepository : IPizzaRepository<Pizza>
     {
-        private readonly string _savePath = ".\\Pizzas\\";
+        private readonly string _savePath = @"..\..\..\Pizzas\";
 
 
         public FilePizzaRepository()

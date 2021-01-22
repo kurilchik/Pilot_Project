@@ -1,4 +1,5 @@
 ﻿using System;
+using Pizza_Bot.Drawing;
 
 
 namespace Pizza_Bot
@@ -7,7 +8,8 @@ namespace Pizza_Bot
     {
         static void Main(string[] args)
         {
-            AsciiArt.AsciiArt.Logo();
+            AsciiArt.Logo();
+            AsciiArt.Timer();
         }
     }
 }
