@@ -7,11 +7,9 @@ namespace Pizza_Bot.Extansions
         public static double TotalPrice(this double num, PizzaSize pizzaSize)
         {
             if (pizzaSize.Equals(PizzaSize.Medium))
-                return num * 1.2;
+                return num * 1.5;
             else if (pizzaSize.Equals(PizzaSize.Large))
-                return num * 1.4;
-            else if (pizzaSize.Equals(PizzaSize.ExtraLarge))
-                return num * 1.6;
+                return num * 2;
             return num;
         }
     }

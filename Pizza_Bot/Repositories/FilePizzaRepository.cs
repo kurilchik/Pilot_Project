@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Pizza_Bot.Repositories
 {
-    class FilePizzaRepository : IPizzaRepository<Pizza>
+    public class FilePizzaRepository : IPizzaRepository<Pizza>
     {
         private readonly string _savePath = @"..\..\..\Pizzas\";
 
