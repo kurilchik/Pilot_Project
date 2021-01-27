@@ -20,7 +20,6 @@ namespace Pizza_Bot.Repositories
             }
         }
 
-
         public void CreatePizza(Pizza pizza)
         {
             string path = $"{_savePath}ID_{pizza.Id}.json";

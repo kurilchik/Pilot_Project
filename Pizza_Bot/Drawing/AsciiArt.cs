@@ -38,19 +38,21 @@ namespace Pizza_Bot.Drawing
         private static void Ascii(string file, int time)
         {            
             Image image = Image.FromFile($@"{_savePath}\{file}");
-            Bitmap bitmap = new Bitmap(image);
 
-            for (int y = 0; y < bitmap.Height; y++)
+            using (Bitmap bitmap = new Bitmap(image))
             {
-                for (int x = 0; x < bitmap.Width; x++)
+                for (int y = 0; y < bitmap.Height; y++)
                 {
-                    Color color = bitmap.GetPixel(x, y);
-                    int greyColor = (color.R + color.G + color.B) / 3;
-                    int index = greyColor * (_ascii.Length - 1) / 255;
-                    Console.Write(_ascii[index]);
+                    for (int x = 0; x < bitmap.Width; x++)
+                    {
+                        Color color = bitmap.GetPixel(x, y);
+                        int greyColor = (color.R + color.G + color.B) / 3;
+                        int index = greyColor * (_ascii.Length - 1) / 255;
+                        Console.Write(_ascii[index]);
+                    }
+                    Console.Write(Environment.NewLine);
                 }
-                Console.Write(Environment.NewLine);
-            }
+            }            
 
             Thread.Sleep(time);
             Console.Clear();

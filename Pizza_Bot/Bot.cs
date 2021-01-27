@@ -4,21 +4,25 @@ using Pizza_Bot.Enums;
 using Pizza_Bot.Repositories;
 using Pizza_Bot.Extansions;
 using Pizza_Bot.Drawing;
+using Pizza_Bot.Attributes;
+using System.Reflection;
+using Pizza_Bot.Exceptions;
 
 namespace Pizza_Bot
 {
     public class Bot
     {
-        private readonly FilePizzaRepository _filePizza = new FilePizzaRepository();
-        private Order _order = new Order();
+        private readonly Customer _customer = new Customer();
+        private readonly Order _order = new Order();
+        private readonly FilePizzaRepository _filePizza = new FilePizzaRepository();     
 
         public void Start()
-        {
+        {            
             AsciiArt.Logo();
 
             Greeting();
-            Introduce();
-            SetEmailAddress();
+            _customer.SetName();
+            _customer.SetEmail();
         }
 
         public void OrderPizza()
@@ -28,19 +32,18 @@ namespace Pizza_Bot
             PrintMenu();
             ChoicePizza();
             PrintOrder();
-
-            Console.WriteLine("Do you want to order more pizza?");
-            if (YesOrNo())
-                OrderPizza();
+            MorePizza(); 
         }
 
         public void Delivery()
         {
+            SetShippingAddress();
             OrderComplete();
             OrderDeliver();
             OrderPaid();
         }
 
+        #region MethodStart
         private void Greeting()
         {
             TimeSpan now = DateTime.Now.TimeOfDay;
@@ -59,20 +62,11 @@ namespace Pizza_Bot
             }
             else
                 Console.Write("Good night! ");
+            Console.WriteLine("Welcome to PIZZA BOT.");
         }
+        #endregion
 
-        private void Introduce()
-        {
-            Console.WriteLine("Please introduce yourself:");
-            _order._customer.Name = Console.ReadLine();
-        }
-
-        private void SetEmailAddress()
-        {
-            Console.WriteLine("Please enter your email address for communication:");
-            _order._customer.Email = Console.ReadLine();
-        }
-
+        #region MethodOrderPizza
         private void PrintMenu()
         {
             List<Pizza> _pizzasList = _filePizza.GetPizzas();
@@ -94,7 +88,7 @@ namespace Pizza_Bot
             {
                 Pizza pizza = _filePizza.GetPizzaByID(userChoice);
                 pizza.Size = ChoicePizzaSize();
-                _order._orderPrice += pizza.BasePrice.TotalPrice(pizza.Size);
+                _order.OrderPrice += pizza.BasePrice.TotalPrice(pizza.Size);
                 _order._pizzas.Add(pizza);
             }
             else
@@ -141,25 +135,14 @@ namespace Pizza_Bot
                 Console.WriteLine($"{counter}. \"{item.Title}\" : {item.BasePrice.TotalPrice(item.Size)} BYN - {item.Size} Size");
                 counter++;
             }
-            Console.WriteLine($"Total price = {_order._orderPrice} BYN\n");
+            Console.WriteLine($"Total price = {_order.OrderPrice} BYN\n");
         }
 
-        private void OrderComplete()
+        private void MorePizza()
         {
-            AsciiArt.Timer();
-            Console.WriteLine("Order is completed.");
-        }
-
-        private void OrderDeliver()
-        {
-            AsciiArt.Timer();
-            Console.WriteLine("Order delivered by courier.");
-        }
-
-        private void OrderPaid()
-        {
-            AsciiArt.Timer();
-            Console.WriteLine("Order has been paid.");
+            Console.WriteLine("Do you want to order more pizza?");
+            if (YesOrNo())
+                OrderPizza();
         }
 
         private bool YesOrNo()
@@ -173,5 +156,82 @@ namespace Pizza_Bot
                 return false;
             return YesOrNo();
         }
+        #endregion
+
+        #region MethodDelivery
+        private void SetShippingAddress()
+        {
+            _customer.SetAddress();
+
+            try
+            {
+                ValidateAddress();
+            }
+            catch (AddressException ex)
+            {
+                Console.WriteLine(ex.Message);
+                SetShippingAddress();
+            }
+        }
+
+        private void ValidateAddress()
+        {
+            Type type = typeof(Customer);
+            foreach (PropertyInfo property in type.GetProperties())
+            {
+                foreach (Attribute attribute in property.GetCustomAttributes())
+                {
+                    MinLenghtAttribute minLenghtAttribute = attribute as MinLenghtAttribute;
+
+                    if (minLenghtAttribute == null)
+                        continue;
+
+                    if (_customer.Address.Length < minLenghtAttribute.MinLenght)
+                    {
+                        throw new AddressException("Address is not valid.");
+                    }
+                }
+            }
+        }
+
+        private void OrderComplete()
+        {
+            string subject = "Order is completed.";
+            string message = $"{_customer.Name}, your order is completed.\nTo pay {_order.OrderPrice} BYN.";
+
+            AsciiArt.Timer();
+
+            Console.WriteLine(subject);
+            MailSend(subject, message);
+        }
+
+        private void OrderDeliver()
+        {
+            string subject = "Order delivered by courier.";
+            string message = $"{_customer.Name}, your order delivered by courier.";
+
+            AsciiArt.Timer();
+
+            Console.WriteLine(subject);
+            MailSend(subject, message);
+        }
+
+        private void OrderPaid()
+        {
+            string subject = "Order has been paid.";
+            string message = $"{_customer.Name}, your order in the amount of {_order.OrderPrice} BYN has been paid.\nBon Appetit!";
+
+            AsciiArt.Timer();
+
+            Console.WriteLine(subject);
+            MailSend(subject, message);
+        }
+
+        private void MailSend(string messageSubject, string messageBody)
+        {
+            Mail mail = new Mail(_customer.Email, messageSubject, messageBody);
+            mail.Send();
+        }
+        #endregion
     }
 }
